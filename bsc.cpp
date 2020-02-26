@@ -346,6 +346,7 @@ namespace bsc
 	template <class T>
 	inline T lineRoot(T a, T b)
 	{
+		// WARNING: This division the guarantee of exactness
 		return a/(a-b);
 	}
 
@@ -388,7 +389,8 @@ namespace bsc
 		T b = k3-k2*T(2.0)+k1;
 
 		if (diffSign(a, b)) {
-			//inflexion = lineRoot(a, b);
+			// WARNING: This division the guarantee of exactness
+			inflexion = lineRoot(a, b);
 			return 2; // 1 inflexion
 		}
 
