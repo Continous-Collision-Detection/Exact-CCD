@@ -148,6 +148,18 @@ public:
       return result;
    }
 
+   // WARNING: Division bad and should be avoided in exact computations
+   inline expansion operator/(const expansion &other) const
+   {
+      expansion result = *this;
+      expansion inv_other = other;
+      for(size_t i = 0; i < other.v.size(); i++){
+          inv_other.v[i] = 1 / other.v[i];
+      }
+      result *= inv_other;
+      return result;
+   }
+
    inline expansion operator-( ) const
    {
       expansion result;

@@ -26,7 +26,7 @@ assert( v[1] == v[1] );
 #ifndef DEBUG
 #define CHECK_ROUNDING_MODE() (void)0;
 #else
-#define CHECK_ROUNDING_MODE() assert( fegetround( ) == FE_UPWARD ); 
+#define CHECK_ROUNDING_MODE() assert( fegetround( ) == FE_UPWARD );
 #endif
 
 
@@ -34,7 +34,7 @@ assert( v[1] == v[1] );
 //
 // class Interval:
 //
-// Stores the interval [a,b] as [-a,b] internally.  With proper arithmetic operations, this 
+// Stores the interval [a,b] as [-a,b] internally.  With proper arithmetic operations, this
 // allows us to use only FE_UPWARD and avoid switching rounding modes over and over.
 //
 // ----------------------------------------
@@ -42,36 +42,38 @@ assert( v[1] == v[1] );
 
 class Interval : public IntervalBase
 {
-   
+
     static int s_previous_rounding_mode;
 
 public:
 
    // Internal representation
    double v[2];
-         
-   Interval( double val );   
+
+   Interval( double val );
    Interval( double left, double right );
    Interval();
-   
+
    virtual ~Interval() {}
-   
+
    virtual double stored_left() const;
    virtual double stored_right() const;
-   
+
    virtual Interval& operator+=(const Interval &rhs);
    virtual Interval& operator-=(const Interval &rhs);
    virtual Interval& operator*=(const Interval &rhs);
-   
+
    virtual Interval operator+(const Interval &other) const;
    virtual Interval operator-(const Interval &other) const;
    virtual Interval operator*(const Interval &other) const;
-   
+   // WARNING: Division bad and should be avoided in exact computations
+   virtual Interval operator/(const Interval &other) const;
+
    virtual Interval operator-( ) const;
-   
+
    static void begin_special_arithmetic();
    static void end_special_arithmetic();
-   
+
 };
 
 inline void create_from_double( double a, Interval& out );
@@ -129,7 +131,7 @@ inline Interval& Interval::operator+=(const Interval &rhs)
    v[0] += rhs.v[0];
    v[1] += rhs.v[1];
    VERIFY();
-   
+
    return *this;
 }
 
@@ -137,7 +139,7 @@ inline Interval& Interval::operator+=(const Interval &rhs)
 
 inline Interval& Interval::operator-=( const Interval& rhs )
 {
-   CHECK_ROUNDING_MODE();   
+   CHECK_ROUNDING_MODE();
    v[0] += rhs.v[1];
    v[1] += rhs.v[0];
    VERIFY();
@@ -148,7 +150,7 @@ inline Interval& Interval::operator-=( const Interval& rhs )
 
 inline Interval& Interval::operator*=( const Interval& rhs )
 {
-   CHECK_ROUNDING_MODE();   
+   CHECK_ROUNDING_MODE();
    Interval p = (*this) * rhs;
    *this = p;
    return *this;
@@ -156,9 +158,9 @@ inline Interval& Interval::operator*=( const Interval& rhs )
 
 // ----------------------------------------
 
-inline Interval Interval::operator+(const Interval &other) const 
+inline Interval Interval::operator+(const Interval &other) const
 {
-   CHECK_ROUNDING_MODE();   
+   CHECK_ROUNDING_MODE();
    double v0 = v[0] + other.v[0];
    double v1 = v[1] + other.v[1  ];
    return Interval(-v0, v1);
@@ -166,12 +168,12 @@ inline Interval Interval::operator+(const Interval &other) const
 
 // ----------------------------------------
 
-inline Interval Interval::operator-(const Interval &other) const 
+inline Interval Interval::operator-(const Interval &other) const
 {
-   CHECK_ROUNDING_MODE();   
+   CHECK_ROUNDING_MODE();
    double v0 = v[0] + other.v[1];
    double v1 = v[1] + other.v[0];
-   return Interval(-v0, v1);              
+   return Interval(-v0, v1);
 }
 
 // ----------------------------------------
@@ -179,14 +181,14 @@ inline Interval Interval::operator-(const Interval &other) const
 inline Interval Interval::operator*(const Interval &other) const
 {
    CHECK_ROUNDING_MODE();
-   
+
    double neg_a = v[0];
    double b = v[1];
    double neg_c = other.v[0];
    double d = other.v[1];
-   
+
    Interval product;
-   
+
    if ( b <= 0 )
    {
       if ( d <= 0 )
@@ -222,13 +224,13 @@ inline Interval Interval::operator*(const Interval &other) const
          product.v[0] = neg_a * d;
          product.v[1] = b * d;
       }
-      
+
    }
    else
    {
       if ( d <= 0 )
       {
-         product.v[0] = b * neg_c; 
+         product.v[0] = b * neg_c;
          product.v[1] = -neg_a * d;
       }
       else if ( -neg_c <= 0 && 0 <= d )
@@ -242,18 +244,25 @@ inline Interval Interval::operator*(const Interval &other) const
          product.v[1] = b * d;
       }
    }
-   
+
    return product;
-   
+
 }
 
+// WARNING: Division bad and should be avoided in exact computations
+inline Interval Interval::operator/(const Interval &other) const
+{
+    CHECK_ROUNDING_MODE();
+    assert(other.v[0] > 0 || other.v[1] < 0);
+    return (*this) * Interval(1 / other.v[0], 1 / other.v[1]);
+}
 
 // ----------------------------------------
 
 inline Interval Interval::operator-( ) const
 {
    CHECK_ROUNDING_MODE();
-   return Interval( -v[1], v[0] );   
+   return Interval( -v[1], v[0] );
 }
 
 // ----------------------------------------
@@ -277,9 +286,8 @@ inline void Interval::end_special_arithmetic()
 inline void create_from_double( double a, Interval& out )
 {
    out.v[0] = -a;
-   out.v[1] = a;   
+   out.v[1] = a;
 }
 
 
 #endif
-
