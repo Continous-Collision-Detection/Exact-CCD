@@ -390,7 +390,9 @@ namespace bsc
 
 		if (diffSign(a, b)) {
 			// WARNING: This division the guarantee of exactness
-			inflexion = lineRoot(a, b);
+			// inflexion = lineRoot(a, b);
+			throw std::runtime_error(
+				"Inflection points are not handled exactly in BSC!");
 			return 2; // 1 inflexion
 		}
 
