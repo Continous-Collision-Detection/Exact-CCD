@@ -1,14 +1,14 @@
-
 #include "rootparitycollisiontest.h"
 #include <cstdlib>
 
-// For M_PI
-#define _USE_MATH_DEFINES // for C++
-#include <cmath>
-
-
 namespace rootparity
 {
+
+#ifdef M_PI
+    constexpr double PI = M_PI;
+#else
+    constexpr double PI = 3.1415926535897932384626433832795;
+#endif
 
     namespace   // unnamed namespace for local functions
     {
@@ -1954,7 +1954,7 @@ namespace rootparity
             // check if any hit was not good
             if ( !good_hit )
             {
-                double r = rand() / (double)RAND_MAX * 2.0 * M_PI;
+                double r = rand() / (double)RAND_MAX * 2.0 * PI;
                 test_ray[0] = cos(r) * ray_len;
                 test_ray[1] = -sin(r) * ray_len;
             }
@@ -2053,7 +2053,7 @@ namespace rootparity
             // check if any hit was not okay
             if ( !good_hit )
             {
-                double r = rand() / (double)RAND_MAX * 2.0 * M_PI;
+                double r = rand() / (double)RAND_MAX * 2.0 * PI;
                 test_ray[0] =  cos(r) * ray_len;
                 test_ray[1] = -sin(r) * ray_len;
             }
