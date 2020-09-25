@@ -11,3 +11,5 @@ add_library(exact-ccd
 expansion.cpp  interval.cpp  rootparitycollisiontest.cpp bsc.cpp
     )
 target_include_directories(exact-ccd PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/)
+target_compile_definitions(exact-ccd PUBLIC NOMINMAX)
+
